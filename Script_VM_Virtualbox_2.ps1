@@ -1,3 +1,7 @@
+####################################################################
+# Script utilisé via Powershell pour gérer les Machines Virtuelles de Virtual Box
+####################################################################
+ 
 
 
 $VM_name= read-host  "nom VM "
