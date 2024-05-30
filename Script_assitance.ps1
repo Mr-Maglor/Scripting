@@ -1,4 +1,9 @@
-﻿#récupération nom utilisateur actif
+####################################################################
+# Script utilisé lors du projet 1 de la formation TSSR, il permet de lancer une connection à distance pour des opération de télémaintenance
+####################################################################
+ 
+ 
+ #récupération nom utilisateur actif
 $activeUser = Get-LocalUser | Where-Object {$_.Enabled -eq "True" } | Select-Object -ExpandProperty Name
 
 #Message de bienvenue
