@@ -1,6 +1,6 @@
 ###############################################################################################################################################################################################################
 ################################################################################################################################################################################################################
-# Script Powershell pour maintenance et information sur Poste Distant Windows
+# Script Powershell pour maintenance et information sur Poste Distant Windows  (Projet 2 TSSR)
 # Version 1.0
 # Réalisé en collaboration par Anais Lenglet, Bruno Serna, Grégory Dubois, Patrick Baggiolini et Thomas Scotti
 # Dernière mise à jour le  22 / 04 / 2024
