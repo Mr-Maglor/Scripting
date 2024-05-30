@@ -2,7 +2,7 @@
 
 ################################################################################################################################################################################################################
 
-# Script Bash pour Maintenance et Information sur Poste Distant Linux
+# Script Bash pour Maintenance et Information sur Poste Distant Linux (Projet 2 TSSR)
 
 # Version 1.0
 
