@@ -1,6 +1,6 @@
 #!/bin/bash
 ###############################
-# Script utilisé pour créer un dossier de sauvegarde automatique
+# Script utilisé pour créer un dossier de sauvegarde de fichier et les déplacer.
 ###############################
 
 
