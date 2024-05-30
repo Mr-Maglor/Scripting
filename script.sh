@@ -1,4 +1,8 @@
 #!/bin/bash
+###############################
+# Script utilisé pour créer un dossier de sauvegarde automatique
+###############################
+
 
 #Demande de sauvegarde des fichiers 
 while   [ "$Sauvegarde" != "O" ]; do
