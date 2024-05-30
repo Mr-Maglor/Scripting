@@ -1,3 +1,7 @@
+###################################
+# Script simulant une mahcine de distribution de boisson
+###################################
+
 read -p "Quelle est votre choix de Boisson : Café, Thé, Chocolat ou x pour sortir :" Choix
 
 if [ $Choix == "café" ] || [ $Choix == "thé" ] || [ $Choix == "chocolat" ]; then
