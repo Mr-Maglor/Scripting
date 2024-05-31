@@ -16,6 +16,4 @@ Script utilisé pour créer un dossier de sauvegarde de fichier et les déplacer
 - script_Cafe.sh  
 Script simulant une mahcine de distribution de boisson
 - SuperScript.sh  
-Script dévelloppé en collaboration pour le projet 2 TSSR pour maintenance et information sur  Poste Distant Linux .
-
-
+Script dévelloppé en collaboration pour le projet 2 TSSR pour maintenance et information sur  Poste Distant Linux.
