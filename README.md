@@ -12,7 +12,7 @@ Script développé sur le premier projet TSSR, permet de lancer automatiquement 
 Script dévelloppé en collaboration pour le projet 2 TSSR pour maintenance et information sur Poste Distant Windows.  
 
 - **Script_mise_en_forme_CSV.ps1** et **Script_mise_en_forme_CSV_S14.ps1**  
-Script développé sur le troisième projet TSSR, il permet de mettre en forme un fichier **XLSX** ( **s09_Pharmgreen.xlsx** et **s14_Pharmgreen.xlsx** )  en **CSV**, fichier contenant des informations utilisateurs pour les rajouter/modifier dans un Active Directory.  
+Script développé sur le troisième projet TSSR, il permet de mettre en forme un fichier **XLSX** (**s09_Pharmgreen.xlsx** et **s14_Pharmgreen.xlsx**)  en **CSV**, fichier contenant des informations utilisateurs pour les rajouter/modifier dans un Active Directory.  
 
 - **Script_Ou_Auto.ps1**  
 Script développé sur le troisième projet TSSR, il permet de créer/modifier automatiquement des Organizations Units et sous Organizations Units utilisateurs/ordinateurs dans un Active Directory.  
