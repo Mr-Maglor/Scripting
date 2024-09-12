@@ -31,7 +31,7 @@ Script développé sur le troisième projet TSSR, ils permettent de créer/modif
 
 - **Script_Difference_User.ps1**  
 Script développé sur le troisième projet TSSR, il permet de répertorier les différences entre deux fichier CSV et les compiler dans un autre fichier CSV.  
-Uutilisation principal : permet de voir les différences entre deux fichiers utilisateurs pour ensuite faire une mise à jour d'un Active Directory.  
+Utilisation principal : permet de voir les différences entre deux fichiers utilisateurs pour ensuite faire une mise à jour d'un Active Directory.  
 Peut être utiliser avec **Script_Suppression_Utilisateur.ps1**, pour supprimer automatiquement des utilisateurs d'un Active Directory.  
 
 - **script_AD-DS.ps1**  
