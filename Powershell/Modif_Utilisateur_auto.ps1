@@ -1,6 +1,6 @@
 ####################################################
 ####################################################
-### SCRIPT MODIFICAITON INFORMATION  UTILISATEUR ###                                           
+### SCRIPT MODIFICATION INFORMATION UTILISATEUR ###
 ####################################################
 ####################################################
 
@@ -51,84 +51,120 @@ function Log
     Add-Content -Path $LogFile -Value $logLine
 }
 
+# Fonction pour ajouter les managers
+function AddUserManager
+{
+    param (
+        [string]$SamAccountName,
+        [string]$Manager
+    )
 
-function FctAjoutUtilisateurs
-{ 
+    # Récupérer le DN du manager
+    if ($Manager -ne '.')
+    {
+        $ManagerDN = (Get-ADUser -Identity $Manager).DistinguishedName
+    }
+
+    if ($Manager -eq '.')
+    {
+        Write-Host "L'utilisateur $SamAccountName n'a pas de manager" -ForegroundColor Yellow
+        Log -FilePath $LogFile -Content "L'utilisateur $SamAccountName n'a pas de manager" -Head "ERROR"
+    }
+    else
+    {
+        try
+        {
+            Set-ADUser -Identity $SamAccountName -Manager $ManagerDN
+            Write-Host "Manager $Manager ajouté à $SamAccountName" -ForegroundColor Green
+            Log -FilePath $LogFile -Content "Manager $Manager ajouté à $SamAccountName" -Head "INFO"
+        }
+        catch
+        {
+            write-host "Manager $Manager n'a pas pu être ajouté à $SamAccountName" -ForegroundColor Red
+            Write-Host $_.Exception.Message -ForegroundColor Red
+            Log -FilePath $LogFile -Content "Manager $Manager n'a pas pu être ajouté à $SamAccountName" -Head "FATAL"
+        }
+    }
+}
+
+# Fonction pour modifier les informations de l'utilisateur
+function ModifyUserInfo
+{
     # Importation des données
     $Users = Import-Csv -Path $File -Delimiter "," -Header $Headers | Select-Object -Skip 1
     $ADUsers = Get-ADUser -Filter * -Properties *
-
     $Count = 1
 
     Foreach ($User in $Users)
     {
-        Write-Progress -Activity "Création des utilisateurs dans les OU" -Status "% effectué" -PercentComplete ($Count/$Users.Length*100)
+        Write-Progress -Activity "Modification des informations utilisateurs" -Status "% effectué" -PercentComplete ($Count/$Users.Length*100)
         $Name              = "$($User.Nom) $($User.Prenom)"
-        $DisplayName       = "$($User.Nom) $($User.Prenom)"
-        $SamAccountName    = $($User.Prenom.ToLower())+ "." + $($User.Nom.ToLower())
+        $SamAccountName    = $($User.Prenom.ToLower()) + "." + $($User.Nom.ToLower())
         $UserPrincipalName = $(($User.Prenom.ToLower() + "." + $User.Nom.ToLower()) + "@" + (Get-ADDomain).Forest)
         $GivenName         = $User.Prenom
         $Surname           = $User.Nom
         $OfficePhone       = $User.Telf
         $PortablePhone     = $User.Telp
         $EmailAddress      = $UserPrincipalName
-        $Path              = "ou=$($User.Service),ou=$($User.Departement),ou=User_Pharmgreen,dc=pharmgreen,dc=org"
+        $Site              = $User.Site
+        $birthday          = $User.DateDeNaissance
         $Department        = "$($User.Departement)"
         $Service           = "$($User.Service)"
         $Fonction          = "$($User.fonction)"
         $Company           = $User.Societe
-        $Manager           = $($User.ManagerNom.ToLower())+ "." + $($User.ManagerPrenom.ToLower())
+        $Manager           = $($User.ManagerPrenom.ToLower())+ "." + $($User.ManagerNom.ToLower())
         $ManagerPrenom     = $User.ManagerPrenom
         $ManagerNom        = $User.ManagerNom
-        $Site              = $User.Site
-        $birthday          = $User.DateDeNaissance
+
 
         # Gestion de présence de Sous OU
-        if ( $User.Service -eq "NA" )
-        # Chemin complet
+        if ($User.Service -eq "NA")
         {
             $Path = "ou=$($User.Departement),ou=User_Pharmgreen,dc=pharmgreen,dc=org"
         }
-        Else
-        # Chemin sans sous OU
+        else
         {
             $Path = "ou=$($User.Service),ou=$($User.Departement),ou=User_Pharmgreen,dc=pharmgreen,dc=org"
         }
 
-        # Vérifier si l'utilisateur existe déjà
         $existingUser = $ADUsers | Where-Object { $_.GivenName -eq $GivenName -and $_.Description -eq $birthday }
 
-        # Création Utilisateur
-        If ($existingUser -eq $Null)
+        if ($existingUser -ne $Null)
         {
-            Try
+            try
             {
-                New-ADUser -Name $Name -DisplayName $DisplayName -SamAccountName $SamAccountName -UserPrincipalName $UserPrincipalName `
-                -GivenName $GivenName -Surname $Surname -HomePhone $OfficePhone -MobilePhone $PortablePhone -EmailAddress $EmailAddress `
-                -Office $Site -Description $birthday -Title $Fonction -City $Site -Path $Path `
-                -AccountPassword (ConvertTo-SecureString -AsPlainText Azerty12024* -Force) -Enabled $True `
-                -OtherAttributes @{Company = $Company;Department = $Department} -ChangePasswordAtLogon $True
+                #Modification des infos utilisateurs
+                Set-ADUser -Identity $SamAccountName `
+                -HomePhone $OfficePhone -MobilePhone $PortablePhone `
+                -Office $Site -Description $birthday -Title $Fonction -City $Site `
+                -Department $Department -Company $Company
+                #Deplacement des utilisateurs dans les nouvelles OU
+                $NewOU = Get-ADUser -Identity $SamAccountName
+                Move-ADObject -Identity $NewOU.DistinguishedName -TargetPath $Path -Confirm:$false
 
-                Write-Host "Création du USER" $SamAccountName -ForegroundColor Green
-                Log -FilePath $LogFile -Content "Création du USER $SamAccountName" -Head "INFO"
+                Write-Host "Modification de l'utilisateur $SamAccountName effectuée" -ForegroundColor Green
+                Log -FilePath $LogFile -Content "Modification de l'utilisateur $SamAccountName effectuée" -Head "INFO"
             }
-            Catch
+            catch
             {
-                write-host "Création du USER" $SamAccountName  "échoué" -ForegroundColor red
-                Log -FilePath $LogFile -Content "Création du USER $SamAccountName échoué" -Head "FATAL"
+                Write-Host "Modification de l'utilisateur $SamAccountName échouée" -ForegroundColor Red
+                Write-Host $_.Exception.Message -ForegroundColor Red
+                Log -FilePath $LogFile -Content "Modification de l'utilisateur $SamAccountName échouée" -Head "FATAL"
             }
+
+            # Appel de la fonction pour ajouter le manager
+            AddUserManager -SamAccountName $SamAccountName -Manager $Manager
         }
-        Else
+        else
         {
-            Write-Host "L'utilsateur $SamAccountName existe déjà" -ForegroundColor Yellow
-            Log -FilePath $LogFile -Content "L'utilsateur $SamAccountName existe déjà"   -Head "ERROR"
+            Write-Host "L'utilisateur $SamAccountName n'existe pas" -ForegroundColor Yellow
+            Log -FilePath $LogFile -Content "L'utilisateur $SamAccountName n'existe pas" -Head "ERROR"
         }
 
         $Count++
         sleep -Milliseconds 100
     }
 }
-
 
 ############## FIN FONCTION ######################
 
@@ -137,12 +173,13 @@ function FctAjoutUtilisateurs
 ############# DEBUT SCRIPT #########################
 ####################################################
 
-############## INTIALISAITON ######################
-### Chemin des dossier et fichier à lire et exploiter
+############## INITIALISATION ######################
+
+### Chemin des dossiers et fichiers à lire et exploiter
 $FilePath = [System.IO.Path]::GetDirectoryName($MyInvocation.MyCommand.Definition)
 $File = "$FilePath\s14_Pharmgreen.csv"
 $LogPath = "C:\Log"
-$LogFile = "$LogPath\Log_Script_Utilisateurs_Auto.log"
+$LogFile = "$LogPath\Log_Script_Modif_User.log"
 
 # Crée le dossier s'il n'existe pas
 if (-Not (Test-Path -Path $LogPath)) {
@@ -153,33 +190,32 @@ if (-Not (Test-Path -Path $LogPath)) {
 if (-Not (Test-Path -Path $LogFile)) {
     New-Item -ItemType File -Path $LogFile | Out-Null
 }
+
 # Définition des en-têtes de colonnes du fichier CSV
 $Headers = "Prenom", "Nom", "Societe", "Site", "Departement", "Service", "fonction", "ManagerPrenom", "ManagerNom", "PC", "DateDeNaissance", "Telf", "Telp", "Nomadisme - Télétravail", "Groupe_User","Groupe_Computer"
 
-# Appel modul Active Directory si pas présent
+# Appel module Active Directory si pas présent
 If (-not(Get-Module -Name activedirectory))
 {
     Import-Module activedirectory
 }
 
-
 ############## APPEL FONCTION ######################
 
-Write-Host "Debut création Utilisateurs" -ForegroundColor Blue
+Write-Host "Debut modification des informations utilsiateurs " -ForegroundColor Blue
 Write-Host "" 
-FctAjoutUtilisateurs
+ModifyUserInfo
 Write-Host "" 
-Write-Host "Fin création Utilisateurs" -ForegroundColor Blue
-Write-Host "" 
-Read-Host "Appuyez sur Entrée pour continuer ..."
-sleep -Seconds 1
-clear-host
-
-
-Write-Host "Reportez vous au fichier Log $LogFile pour vérifier si il y a eu des souci lors de l'exécution du script" -ForegroundColor Blue
+Write-Host "Fin des modifications des informations utilsiateurs " -ForegroundColor Blue
 Write-Host "" 
 Read-Host "Appuyez sur Entrée pour continuer ... "
 sleep -Seconds 1
+clear-host
 
+Write-Host "Reportez vous au fichier Log $LogFile pour vérifier si il y a eu des souci lors de l'exécution du script et si il y a des utilisateurs qui doivent être modifié manuellement" -ForegroundColor blue
+Write-Host "" 
+Read-Host "Appuyez sur Entrée pour continuer ... "
+sleep -Seconds 1
+clear-host
 
 ############## FIN DU SCRIPT ######################
